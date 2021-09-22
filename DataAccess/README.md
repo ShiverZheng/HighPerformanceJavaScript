@@ -41,3 +41,51 @@
 函数执行过程中，每遇到一个变量，都会经历一次标识符解析的过程以决定从哪里获取或存储数据。从作用域头（活动对象）开始搜索，如果没找到就继续搜索作用域链中的下一个对象。若无匹配标识符将被视为未定义，每次搜索访问```sum```、```num1```、```num2```时都会产生搜索过程，从而影响了性能。
 
 如果两个相同名字的变量存在于作用域链的不同部分，那么标识符就是遍历作用域链时最先找到的那个，也就是第一个变量遮蔽```(Shadow)```了第二个。
+
+#### 标识符解析的性能 Identifier Resolution Performance
+
+在执行环境的作用域链中，一个标识符所在位置越深，它的读写速度越慢。因此读取局部变量是最快的，全局变量是最慢的，全局变量总是存在于执行环境作用域链的最末端。
+
+如果某个跨作用域的值在函数中被引用了一次以上，那么就把它存到局部变量里面：
+```js
+	function initUI() {
+		// var bd = document.body,
+		// 	links = document.getElementsByTagName('a'),
+		// 	i = 0,
+		// 	len = links.length;
+
+		// 该函数引用了三次document，而它是一个全局对象
+		var doc = document,
+			bd = doc.body,
+			links = doc.getElementsByTagName('a'),
+			i = 0,
+			len = links.length;
+		
+		while(i < len) {
+			update(links[i++])
+		}
+		doc.getElementById('go-btn').onclick = function() {
+			start();
+		}
+		bd.className = 'active'
+	}
+```
+
+#### 闭包、作用域和内存 Closures, Scope, and Memory
+
+```js
+	function assignEvents() {
+		var id = "xdi9592"
+		document.getElementById('btn').onlick = function(event) {
+			saveDocument(id)
+		}
+	}
+```
+```assignEvents()```函数给一个```DOM```元素设置事件处理函数，这个函数就是闭包。它在```assignEvent()```执行时创建，为了能访问```id```变量，必须创建一个特殊的作用域。如下的活动对象为闭包所创建：
+![闭包](./IMAGES/closure.png)
+由于闭包的```[[scope]]```属性包含了与执行环境作用域链相同的对象引用，因此会产生副作用，函数的活动对象会随着执行环境一起销毁，由于引用存在于闭包的```[[scope]]```中，因此激活对象无法销毁。
+
+当闭包代码执行时，会创建一个执行环境，它的作用域与属性```[[scope]]```中所引用的两个相同的作用域链对象一起被初始化，然后活动对象为闭包自身所创建。
+![运行中的闭包]('./../IMAGES/running_closure.png)
+
+闭包中的两个标识符，```id```和```saveDocument```，它们在作用域链第一个对象之后，这就是使用闭包最需要关注的性能点，在频繁访问跨作用域标识符时，每次访问都会带来性能损失。可以配合跨作用域处理意见，来减轻闭包的影响。
