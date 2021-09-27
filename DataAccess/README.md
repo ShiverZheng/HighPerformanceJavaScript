@@ -89,3 +89,18 @@
 ![运行中的闭包]('./../IMAGES/running_closure.png)
 
 闭包中的两个标识符，```id```和```saveDocument```，它们在作用域链第一个对象之后，这就是使用闭包最需要关注的性能点，在频繁访问跨作用域标识符时，每次访问都会带来性能损失。可以配合跨作用域处理意见，来减轻闭包的影响。
+
+### 对象成员 Object Members
+
+#### 原型 Prototypes
+
+对象通过一个内部的```__proto__```属性绑定到它的原型。一旦创建一个内置对象的实例，它们就会自动拥有一个Object实例作为原型。因此对象可以有两种成员类型：实例成员（own成员）和原型成员。实例成员直接存在于对象实例中，原型成员则从对象成员继承而来。通过```hasOwnProperty()```来判断对象是否包含特定的属性。
+
+```js
+	var book = {
+		title: "High Performance JavaScript",
+		publisher: "Yahoo! Press"
+	}
+	book.toString()	// "[object Object]"
+```
+![实例成员和原型的关系](./IMAGES/proto.png)
