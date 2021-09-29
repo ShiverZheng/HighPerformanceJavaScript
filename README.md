@@ -5,3 +5,5 @@
 ### 第一章  [加载和执行](./LoadingAndExecution/README.md)
 
 ### 第二章  [数据存取](./DataAccess/README.md)
+
+### 第三章  [DOM编程](./DomScripting/README.md)
