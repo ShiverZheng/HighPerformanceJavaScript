@@ -164,3 +164,181 @@ while (i) {
 对每个数组项调用外部方法所带来的开销是速度慢的主要原因。
 
 在所有情况下，基于循环的迭代比基于函数的迭代快8倍，因此在运行速度要求严格时，基于函数的迭代不是合适的选择。
+
+## 条件语句 Conditionals
+
+### if-else 对比 switch if-else Versus switch
+
+通常来说，if-else适用于判断两个离散值或几个不同的值域。当判断多于两个离散值时，switch语句是更佳选择。
+
+### 优化if-else Optimizing if-else 
+
+优化if-else的目标是：最小化到达正确分支前所需判断的条件数量。最简单的优化方法是确保最可能出现的条件放在首位。考虑如下代码：
+```js
+	// 只有当value值经常小于5的时候才是最优的
+	// 如果value大于5或者等于10，那么每次到达正确分支之前必须经过两个条件判断，最终增加了这个语句所消耗的平均时间。
+	if (v < 5) {
+		// do something
+	} else if (v > 5 && v < 10) {
+		// do something
+	} else { 
+		// do something
+	}
+```
+
+> if-else中的条件语句应该总是按照从最大概率到最小概率的顺序排列，以确保运行速度最快。
+
+```js
+if (v < 6) {
+	if (v < 3) {
+		if (v == 0) {
+			return result0
+		} else if (value == 1) {
+			return result1
+		}
+		return result2
+	} else {
+		if (v == 3) {
+			return result3
+		} else if (v == 4) {
+			return result4
+		}
+		return result5
+	}
+} else {
+	if (v < 8) {
+		if (v == 6) {
+			return result6
+		} else {
+			return result7
+		}
+	} else {
+		if (v == 8) {
+			return result8
+		} else if (v == 9) {
+			return result9
+		} else {
+			return result10
+		}
+	}
+}
+```
+> 使用二分法把值域分成一系列的区间，然后逐步缩小范围。当值的范围均匀分布在0到10之间时，代码运行的平均时间大约是每个条件都判断的一半。这个方法非常适用于有多个值域需要测试的时候（如果是离散值，那么switch语句通常更为合适）。
+
+### 查找表 Lookup Tables
+
+有些时候优化条件语句的最佳方案是避免使用if-else和switch。
+
+当有大量离散值需要测试时，if-else和switch都比使用查找表慢很多。JavaScript中可以用数组和普通对象来构造查找表，通过查找表访问数据比用if-else或switch快很多，特别是在条件语句数量很大的时候
+
+当单个键和单个值之间存在逻辑映射时，查找表的优势就能体现出来。switch语句更适合于每个键都需要对应一个独特的动作或一系列动作的场合。
+
+## 递归 Recursion
+
+### 调用栈限制 Call Stack Limits
+
+JavaScript引擎支持的递归数量与JavaScript调用栈大小直接相关。只有IE例外，它的调用栈与系统空闲内存有关，而其他所有浏览器都有固定数量的调用栈限制。大多数现代浏览器的调用栈数量比老版本浏览多出很多（比如Safari 2的调用栈大小只有100）。
+
+### 递归模式 Recursion Patterns
+
+常见的导致栈溢出的原因是不正确的终止条件，因此定位模式错误的第一步是验证终止条件。如果终止条件没问题，那么可能是算法中包含了太多层递归，为了能在浏览器中安全地工作，建议改用迭代或`Memoization`，或者结合两者使用。
+
+### 迭代 Iteration
+
+任何递归能实现的算法也可以同样用迭代来实现。迭代算法通常包含几个不同的循环，分别对应计算过程的不同方面，这也会引入它们自身的性能问题。然而，使用优化后的循环替代长时间运行的递归函数可以提升性能，因为运行一个循环比反复调用一个函数的开销要少得多。
+
+```js
+// 递归
+
+// 对两个有序数组排列
+function merge(left, right) {
+	var result = []
+	while (left.length > 0 && right.length > 0) {
+		// 因为数组是有序的，所以每次只用对第一个元素进行比较
+		// 始终把两个数组中最小的放入结果
+		if (left[0] < right[0]) {
+			result.push(left.shift())
+		} else {
+			result.push(right.shift())
+		}
+	}
+	return result.concat(left).concat(right)
+}
+
+// 不断拆分成最小单位
+function mergeSort(items) {
+	if (items.length == 1) return items
+	var middle = Math.floor(items.length / 2)
+	var left = items.slice(0, middle)
+	var right = items.slice(middle)
+	return merge(mergeSort(left), mergeSort(right))
+}
+```
+> 合并排序的代码相当简单直观，但是`mergeSort()`函数会导致很频繁的自调用。一个长度为n的数组最终会调用`mergeSort()` **2*n-1** 次，这意味着一个长度超过1500的数组会在Firefox上发生栈溢出错误。
+
+```js
+// 迭代
+// 使用相同的merge函数
+function mergeSort(items){
+    var len = items.length
+    if(len == 1) {
+        return items
+    }
+    var result = []
+    for(var i = 0; i < len; i++) {
+        result.push([items[i]])
+    }
+    // 如果数组长度为奇数
+    if(len % 2) {
+        result.push([])
+    }
+    var lim = len / 2
+    while(lim >= 1) {
+        for(var j = 0, k = 0; j < lim; j++, k = k + 2) {
+            result[j] = merge(result[k], result[k + 1])
+        }
+        lim = lim / 2;
+    }
+    return result[0];
+}
+```
+
+### Memoization
+
+Memoization正是一种避免重复工作的方法，它缓存前一个计算结果供后续计算使用，避免了重复工作。这使得它成为递归算法中有用的技术。
+
+```js
+function fatorial(n) {
+	if (n == 0) return 1
+	return n * fatorial(n - 1)
+}
+
+// better
+function memfactorial(n) {
+	if (!memfactorial.cache) {
+		memfactorial.cache = {
+			'0': 1,
+			'1': 1
+		}
+	}
+
+	if (!memfactorial.cache.hasOwnProperty(n)) {
+		memfactorial.cache[n] = n * memfactorial(n -1)
+	}
+
+	return memfactorial.cache[n]
+}
+```
+
+## 小结 Summary
+
+如同其他编程语言，代码的写法和算法会影响JavaScript的运行时间。与其他语言不同的是，JavaScript可用资源有限，因此优化技术更为重要。
+- for、while和do-while循环性能特性相似，所以没有一种循环类型明显快于或慢于其他类型。
+- 避免使用for-in循环，除非你需要遍历一个属性数量未知的对象。
+- 改善循环性能的最佳方式是减少每次迭代的运算量和减少循环迭代次数。
+- 通常来说，switch总是比if-else快，但并不总是最佳解决方案。
+- 在判断条件较多时，使用查找表比if-else和switch更快。
+- 浏览器的调用栈大小限制了递归算法在JavaScript中的应用；栈溢出错误会导致其他代码中断运行。
+- 如果你遇到栈溢出错误，可将方法改为迭代算法，或使用Memoization来避免重复计算。
+
+运行的代码数量越大，使用这些策略所带来的性能提升也就越明显。
