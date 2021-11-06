@@ -35,3 +35,11 @@
 ### 第八章 [Programming Practices](./ProgrammingPractices/README.md)
 
 > 每种编程语言都有其痛点，随着时间的推移，低效模式也不断发展。其原因在于，越来越多的人们开始使 用这种语言，不断扩种它的边界。自 2005 年以来，当术语“Ajax”出现时，网页开发者对 JavaScript 和浏览器的推动作用远超过以往。其结果是出现了一些非常特别的模式，即有精华也有糟粕。这些模式的出现，是因为网络上 JavaScript 的性质决定的。
+
+### 第九章 [Building and Deploying High-Performance JavaScript Applications](./BuildingAndDeploy/README.md)
+
+> 本章的目的是了解如何有效地组织并部署基于 JavaScript 的 Web 应用的一些必要的知识。
+
+### 第十章 [Tools]
+
+> 第九与第十章内容在现代web编程中，有更好的方式。
