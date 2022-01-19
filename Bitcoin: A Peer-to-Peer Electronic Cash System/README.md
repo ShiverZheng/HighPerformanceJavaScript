@@ -104,3 +104,13 @@
 输出:
 - 支付（收款方）
 - 如果必要，另外一个是找零（发款方）
+
+### 隐私
+
+公钥匿名
+> 公众可以看到转账金额，但没有信息指向某个确定的人。
+
+每笔交易都会启动一对新的公私钥，防止他人追溯交易到同一所有者。
+
+### [计算](https://github.com/xiaolai/bitcoin-whitepaper-chinese-translation/blob/master/Bitcoin-Whitepaper-EN-CN.md#11-%E8%AE%A1%E7%AE%97-calculations)
+
